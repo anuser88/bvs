@@ -16,8 +16,10 @@ namespace mineproxy
 			MP mp = new();
 			Console.Write($"Target project's ID: ");
 			string prjid = Console.ReadLine()!;
-			Console.Write($"Target project's author's username: ");
-			string prjauthusrn = Console.ReadLine()!;
+			string prjdat = await mp.GetStringFrom($"https://api.scratch.mit.edu/projects/{prjid}");
+			JsonDocument prjdoc = JsonDocument.Parse(prjdat);
+			JsonElement authdat = prjdoc.RootElement.GetProperty("author");
+			string prjauthusrn = authdat.GetProperty("username").GetString()!;
 			string target = $"https://api.scratch.mit.edu/users/{prjauthusrn}/projects/{prjid}/views";
 			await mp.Init(target);
 			int xdef = 5000;
@@ -142,11 +144,13 @@ namespace mineproxy
 			live = new ConcurrentBag<string>();
 			int sibu = FetchedProxies.Count;
 			if (sibu == 0) throw new InvalidOperationException("No proxy available");
-			for (int lol = 0; lol < workerCount; lol += sibu) {
+			int lol = 0;
+			do {
 				foreach (var p in FetchedProxies) {
 					queue.Enqueue(p);
 				}
-			}
+				lol += sibu;
+			} while (lol + sibu <= workerCount);
 
 			Task[] workers = new Task[workerCount];
 
@@ -165,11 +169,13 @@ namespace mineproxy
 			live = new ConcurrentBag<string>();
 			int sibu = VipProxies.Count;
 			if (sibu == 0) throw new InvalidOperationException("No proxy available");
-			for (int lol = 0; lol < workerCount; lol += sibu) {
+			int lol = 0;
+			do {
 				foreach (var p in VipProxies) {
 					queue.Enqueue(p);
 				}
-			}
+				lol += sibu;
+			} while (lol + sibu <= workerCount);
 
 			Task[] workers = new Task[workerCount];
 
@@ -261,6 +267,9 @@ namespace mineproxy
 			{
 				Console.WriteLine("\x1b[31mFailed to fetch GeoNode!\x1b[0m");
 			}
+		}
+		public async Task<string> GetStringFrom(string urlll) {
+			return await this.client.GetStringAsync(urlll);
 		}
 	}
 }
