@@ -225,7 +225,8 @@ namespace mineproxy
 		{
 			int c = 0;
 			string ip;
-			/* var res = await client.GetAsync("https://proxylist.geonode.com/api/proxy-list?limit=500");
+			string port;
+			var res = await client.GetAsync("https://proxylist.geonode.com/api/proxy-list?limit=500");
 			if ((int)res.StatusCode == 200)
 			{
 				string content = await res.Content.ReadAsStringAsync();
@@ -245,9 +246,9 @@ namespace mineproxy
 			} else 
 			{
 				Console.WriteLine("\x1b[31mFailed to fetch GeoNode!\x1b[0m");
-			}*/
+			}
 			c = 0;
-			var res = await client.GetAsync("https://freeproxies-api.website.proxymaven.com/proxies?per_page=100000");
+			res = await client.GetAsync("https://freeproxies-api.website.proxymaven.com/proxies?per_page=100000");
 			if ((int)res.StatusCode == 200)
 			{
 				string content = await res.Content.ReadAsStringAsync();
